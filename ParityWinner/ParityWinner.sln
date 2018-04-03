@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2006
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParityWinner", "ParityWinner\ParityWinner.csproj", "{CF93BE90-AF8B-499C-8AE7-BE2C7269059D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CF93BE90-AF8B-499C-8AE7-BE2C7269059D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF93BE90-AF8B-499C-8AE7-BE2C7269059D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF93BE90-AF8B-499C-8AE7-BE2C7269059D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF93BE90-AF8B-499C-8AE7-BE2C7269059D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5C5EC10D-AE10-4322-A5F9-BAAFC52DD21C}
+	EndGlobalSection
+EndGlobal
