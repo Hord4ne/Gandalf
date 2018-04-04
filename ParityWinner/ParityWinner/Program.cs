@@ -10,6 +10,31 @@ namespace ParityWinner
     {
         static void Main(string[] args)
         {
+            var basicInfo = Console.ReadLine().Split(' ');
+            var n0 = int.Parse(basicInfo[0]);
+            var n1 = int.Parse(basicInfo[1]);
+            var m = int.Parse(basicInfo[2]);
+            var graph = new ParityGraph();
+            for (var i = 0; i < n0; i++)
+            {
+                var vertexInfo = Console.ReadLine().Split(' ');
+                graph.LoadVertexToGraph(int.Parse(vertexInfo[0]), int.Parse(vertexInfo[1]), Player.Good);
+            }
+            for (var i = 0; i < n1; i++)
+            {
+                var vertexInfo = Console.ReadLine().Split(' ');
+                graph.LoadVertexToGraph(int.Parse(vertexInfo[0]), int.Parse(vertexInfo[1]), Player.Good);
+            }
+            for (var i = 0; i < m; i++)
+            {
+                var edgeInfo = Console.ReadLine().Split(' ');
+                graph.AddEgde(int.Parse(edgeInfo[0]), int.Parse(edgeInfo[1]));
+            }
+            var startingIndex = int.Parse(Console.ReadLine());
+            var startingNode = graph.NormalStructure[startingIndex].First();
+            var result = ZielonkaAlgorithm.DetermineWinningRegions(graph);
+            Console.WriteLine(result.GoodWinningRegions.Contains(startingNode) ? "0" : "1");
+            Console.ReadKey();
         }
     }
 
@@ -81,9 +106,9 @@ namespace ParityWinner
             return result;
         }
     }
-    public class ZielonkaAlgorithm
+    public static class ZielonkaAlgorithm
     {
-        public ZielonkaResult DetermineWinningRegions(ParityGraph graph)
+        public static ZielonkaResult DetermineWinningRegions(ParityGraph graph)
         {
             var result = new ZielonkaResult();
             if (graph.IsEmpty())
@@ -97,7 +122,7 @@ namespace ParityWinner
             var recursiveZielonkaForSatisfied = DetermineWinningRegions(graph.MakeSubGame(attractorOfSatisfingVert));
             if (!recursiveZielonkaForSatisfied.GetPlayersRegions(notSatisfiedPlayer).Any())
             {
-                result.SetPlayersRegions(satisfiedPlayer, result.GetPlayersRegions(satisfiedPlayer).Union(recursiveZielonkaForSatisfied.GetPlayersRegions(satisfiedPlayer)).ToList());
+                result.SetPlayersRegions(satisfiedPlayer, result.GetPlayersRegions(satisfiedPlayer).Union(recursiveZielonkaForSatisfied.GetPlayersRegions(satisfiedPlayer)));
                 result.SetPlayersRegions(notSatisfiedPlayer, new List<Node>());
             }
             else
@@ -105,43 +130,53 @@ namespace ParityWinner
                 var attractorOfNotSatisfiedVert = CalculateAttractor(recursiveZielonkaForSatisfied.GetPlayersRegions(notSatisfiedPlayer), graph, notSatisfiedPlayer);
                 var recursiveZielonkaUnsatisfied = DetermineWinningRegions(graph.MakeSubGame(attractorOfNotSatisfiedVert));
                 result.SetPlayersRegions(satisfiedPlayer, recursiveZielonkaUnsatisfied.GetPlayersRegions(satisfiedPlayer));
-                result.SetPlayersRegions(notSatisfiedPlayer, recursiveZielonkaUnsatisfied.GetPlayersRegions(notSatisfiedPlayer).Union(attractorOfNotSatisfiedVert).ToList());
+                result.SetPlayersRegions(notSatisfiedPlayer, recursiveZielonkaUnsatisfied.GetPlayersRegions(notSatisfiedPlayer).Union(attractorOfNotSatisfiedVert));
             }
             return result;
         }
 
-        private HashSet<Node> CalculateAttractor(IEnumerable<Node> satisfingVert, ParityGraph graph, Player player)
+        private static HashSet<Node> CalculateAttractor(IEnumerable<Node> satisfingVert, ParityGraph graph, Player player)
         {
-            var result = new HashSet<Node>();
-            foreach (var vert in satisfingVert)
+            var nodesInAttractor = new HashSet<Node>(satisfingVert);
+            bool fixedPoint = false;
+            while (!fixedPoint)
             {
-                var partialRes = CalculateAttractorForSingleVert(vert, graph, player);
-                result.Union(partialRes);
+                var size = nodesInAttractor.Count;
+                var tmpAttractor = new HashSet<Node>(nodesInAttractor);
+                foreach (var vert in tmpAttractor)
+                {
+                    var playersNeighbours = graph.ReversedStructure[vert.Index].Where(x => x.Owner == player);
+                    var enemiesNieghbours = graph.ReversedStructure[vert.Index].Where(x => x.Owner != player);
+                    //we add all of our nodes and the ones of our enemy that have no choice but to end in our attr vert
+                    nodesInAttractor.UnionWith(playersNeighbours);
+                    nodesInAttractor.UnionWith(enemiesNieghbours.Where(c=>graph.NormalStructure[c.Index].Skip(1).All(z => nodesInAttractor.Contains(z))));
+                }
+                fixedPoint = size == nodesInAttractor.Count;
             }
-            return result;
+            return nodesInAttractor;
         }
 
-        private HashSet<Node> CalculateAttractorForSingleVert(Node vert, ParityGraph graph, Player player)
+        private static HashSet<Node> CalculateAttractorForSingleVert(Node vert, ParityGraph graph, Player player)
         {
             throw new NotImplementedException();
         }
 
         public class ZielonkaResult
         {
-            public List<Node> GoodWinningRegions { get; set; } = new List<Node>();
-            public List<Node> BadWinningRegions { get; set; } = new List<Node>();
-            public List<Node> GetPlayersRegions(Player player)
+            public HashSet<Node> GoodWinningRegions { get; set; } = new HashSet<Node>();
+            public HashSet<Node> BadWinningRegions { get; set; } = new HashSet<Node>();
+            public HashSet<Node> GetPlayersRegions(Player player)
             {
                 if (player == Player.Good)
                     return GoodWinningRegions;
                 return BadWinningRegions;
             }
-            public void SetPlayersRegions(Player player, List<Node> regions)
+            public void SetPlayersRegions(Player player, IEnumerable<Node> regions)
             {
                 if (player == Player.Good)
-                    GoodWinningRegions = regions;
+                    GoodWinningRegions = new HashSet<Node>(regions);
                 else
-                    BadWinningRegions = regions;
+                    BadWinningRegions = new HashSet<Node>(regions);
             }
         }
     }
