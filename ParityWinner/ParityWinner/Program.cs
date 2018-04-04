@@ -23,7 +23,7 @@ namespace ParityWinner
             for (var i = 0; i < n1; i++)
             {
                 var vertexInfo = Console.ReadLine().Split(' ');
-                graph.LoadVertexToGraph(int.Parse(vertexInfo[0]), int.Parse(vertexInfo[1]), Player.Good);
+                graph.LoadVertexToGraph(int.Parse(vertexInfo[0]), int.Parse(vertexInfo[1]), Player.Bad);
             }
             for (var i = 0; i < m; i++)
             {
@@ -33,6 +33,17 @@ namespace ParityWinner
             var startingIndex = int.Parse(Console.ReadLine());
             var startingNode = graph.NormalStructure[startingIndex].First();
             var result = ZielonkaAlgorithm.DetermineWinningRegions(graph);
+            Console.WriteLine("\nPlayer 0 winning regions");
+            foreach (var good in result.GoodWinningRegions)
+            {
+                Console.WriteLine(good.Index);
+            }
+            Console.WriteLine("\nPlayer 1 winning regions");
+            foreach (var bar in result.BadWinningRegions)
+            {
+                Console.WriteLine(bar.Index);
+            }
+            Console.WriteLine("\nWinner is: ");
             Console.WriteLine(result.GoodWinningRegions.Contains(startingNode) ? "0" : "1");
             Console.ReadKey();
         }
@@ -64,13 +75,12 @@ namespace ParityWinner
     {
         public Dictionary<int,List<Node>> NormalStructure { get; set; }
         public Dictionary<int,List<Node>> ReversedStructure { get; set; }
-        public int InitialVertex { get; set; }
         public ParityGraph()
         {
             this.NormalStructure = new Dictionary<int, List<Node>>();
             this.ReversedStructure = new Dictionary<int, List<Node>>();
         }
-
+        // first node on the list of key x is the node of index x the rest of the list contains neighbours of node x
         public void LoadVertexToGraph(int index, int color, Player owner)
         {
             this.NormalStructure.Add(index, new List<Node> { new Node { Index = index, Color = color, Owner = owner } });
@@ -94,7 +104,7 @@ namespace ParityWinner
             var indexesToDel = new HashSet<int>(attractorOfSatisfingVert.Select(x => x.Index));
             var newNormalStructure = new Dictionary<int, List<Node>>();
             var newReversedStructure = new Dictionary<int, List<Node>>();
-            foreach (var key in result.NormalStructure.Keys)
+            foreach (var key in NormalStructure.Keys)
             {
                 if (!indexesToDel.Contains(key)) {
                     newNormalStructure[key] = this.NormalStructure[key].Where(x => !attractorOfSatisfingVert.Contains(x)).ToList();
@@ -122,7 +132,7 @@ namespace ParityWinner
             var recursiveZielonkaForSatisfied = DetermineWinningRegions(graph.MakeSubGame(attractorOfSatisfingVert));
             if (!recursiveZielonkaForSatisfied.GetPlayersRegions(notSatisfiedPlayer).Any())
             {
-                result.SetPlayersRegions(satisfiedPlayer, result.GetPlayersRegions(satisfiedPlayer).Union(recursiveZielonkaForSatisfied.GetPlayersRegions(satisfiedPlayer)));
+                result.SetPlayersRegions(satisfiedPlayer, attractorOfSatisfingVert.Union(recursiveZielonkaForSatisfied.GetPlayersRegions(satisfiedPlayer)));
                 result.SetPlayersRegions(notSatisfiedPlayer, new List<Node>());
             }
             else
