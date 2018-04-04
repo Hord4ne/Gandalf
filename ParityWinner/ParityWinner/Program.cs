@@ -33,19 +33,19 @@ namespace ParityWinner
             var startingIndex = int.Parse(Console.ReadLine());
             var startingNode = graph.NormalStructure[startingIndex].First();
             var result = ZielonkaAlgorithm.DetermineWinningRegions(graph);
-            Console.WriteLine("\nPlayer 0 winning regions");
-            foreach (var good in result.GoodWinningRegions)
-            {
-                Console.WriteLine(good.Index);
-            }
-            Console.WriteLine("\nPlayer 1 winning regions");
-            foreach (var bar in result.BadWinningRegions)
-            {
-                Console.WriteLine(bar.Index);
-            }
-            Console.WriteLine("\nWinner is: ");
+            //Console.WriteLine("\nPlayer 0 winning regions");
+            //foreach (var good in result.GoodWinningRegions)
+            //{
+            //    Console.WriteLine(good.Index);
+            //}
+            //Console.WriteLine("\nPlayer 1 winning regions");
+            //foreach (var bar in result.BadWinningRegions)
+            //{
+            //    Console.WriteLine(bar.Index);
+            //}
+            //Console.WriteLine("\nWinner is: ");
             Console.WriteLine(result.GoodWinningRegions.Contains(startingNode) ? "0" : "1");
-            Console.ReadKey();
+            //Console.ReadKey();
         }
     }
 
